@@ -3,24 +3,25 @@ package com.houssam.user_service.user;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "watchlist")
+public class Watchlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String userName;
+    private long userId;
 
     @Column(nullable = false)
-    private String email;
+    private long videoId;
 
-    private String password;
-
+    private LocalDate addedAt;
 }
