@@ -1,3 +1,5 @@
 spring:
   application:
     name: video-service
+  config:
+    import: optional:configserver:http://localhost:8888
