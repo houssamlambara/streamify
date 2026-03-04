@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface WatchlistRepository extends JpaRepository<Watchlist,Long> {
-    boolean existsByVideoId(Long videoId);
+    boolean existsByVideoId(String videoId);
 
     @Query("SELECT w FROM Watchlist w WHERE " +
             "w.userId =:userId AND w.videoId=:videoId")
