@@ -40,7 +40,7 @@ public class Video {
     private Double rating;
     private String director;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "cast_list", columnDefinition = "TEXT")
     private String cast;
     private String tmdbId;
 
