@@ -46,11 +46,6 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User updateUser(long id,UserDto dto) {
-        boolean exists = repository.existsById(id);
-
-        if(!exists){
-            ;
-        }
 
         User user = repository.findById(id).orElseThrow(
                 () -> new RuntimeException("user not found, id :"+id)
