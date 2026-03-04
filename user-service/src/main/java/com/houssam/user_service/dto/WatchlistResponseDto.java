@@ -9,4 +9,5 @@ public class WatchlistResponseDto {
     private Long userId;
     private Long videoId;
     private LocalDateTime addedAt;
+    private VideoDto video;
 }
