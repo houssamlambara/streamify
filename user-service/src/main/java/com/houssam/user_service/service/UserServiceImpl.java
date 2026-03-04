@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
@@ -38,13 +40,27 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User getAllUser() {
-        return null;
+    public List<User> getAllUser() {
+        return repository.findAll();
     }
 
     @Override
-    public User updateUser(UserDto dto) {
-        return null;
+    public User updateUser(long id,UserDto dto) {
+        boolean exists = repository.existsById(id);
+
+        if(!exists){
+            ;
+        }
+
+        User user = repository.findById(id).orElseThrow(
+                () -> new RuntimeException("user not found, id :"+id)
+        );
+
+        user.setUserName(dto.getUserName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode((dto.getPassword())));
+
+        return repository.save(user);
     }
 
     @Override
