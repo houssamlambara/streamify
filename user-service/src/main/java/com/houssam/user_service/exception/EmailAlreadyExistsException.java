@@ -1,4 +1,4 @@
-package com.houssam.user_service;
+package com.houssam.user_service.exception;
 
 public class EmailAlreadyExistsException extends RuntimeException {
     public EmailAlreadyExistsException(String message) {

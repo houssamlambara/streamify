@@ -13,6 +13,6 @@ public interface UserService {
     List<User> getAllUser();
     User updateUser(Long id, UserRequestDto dto);
     void deleteUser(Long userId);
-    Watchlist addToWatchlist(WatchlistRequestDto dto);
+    Watchlist addToWatchlist(Long userId,WatchlistRequestDto dto);
     void removeFromWatchList(Long id);
 }
