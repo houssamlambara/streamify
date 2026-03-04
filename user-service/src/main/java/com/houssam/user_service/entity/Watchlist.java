@@ -25,4 +25,9 @@ public class Watchlist {
     private long videoId;
 
     private LocalDateTime addedAt;
+
+    @PrePersist
+    public void onCreate(){
+        addedAt = LocalDateTime.now();
+    }
 }
