@@ -36,7 +36,6 @@ streamify/
 ### ⚙️ config-service
 - Fournit la configuration centralisée à tous les autres services.
 - Dépendances : `spring-boot-starter-web`, `spring-cloud-starter-netflix-eureka-server`
-- **⚠️ Note :** Ce service embarque aussi une dépendance Eureka Server — à vérifier si c'est intentionnel ou si c'est le rôle du `discovery-service`.
 
 ### 🗺️ discovery-service
 - Registre Eureka : tous les services s'y enregistrent et le consultent pour se localiser entre eux.
@@ -85,43 +84,34 @@ Les services doivent être lancés dans cet ordre :
 
 ---
 
-## ▶️ Lancer le projet en local
+## ▶️ Lancer le projet
 
-**Important :** Les microservices doivent être démarrés dans des terminaux séparés et dans l'ordre strict ci-dessous.
+L'ordre de démarrage est strict et chaque service doit logiquement être lancé dans un terminal dédié.
 
-Ouvrez **5 terminaux différents** à la racine du projet (`streamify/`) et exécutez les commandes suivantes dans l'ordre :
-
-### 1️⃣ Lancer le serveur de configuration (Config Service)
-Ce service doit être lancé en premier car tous les autres en dépendent pour leur configuration.
+### 1. Config Service
 ```bash
 cd config-service
 mvnw.cmd spring-boot:run
 ```
-*(Attendez que le terminal affiche "Started ConfigServiceApplication" avant de passer à la suite)*
 
-### 2️⃣ Lancer l'annuaire (Discovery Service / Eureka)
+### 2. Discovery Service (Eureka)
 ```bash
 cd discovery-service
 mvnw.cmd spring-boot:run
 ```
-*(Une fois démarré, le dashboard Eureka est accessible sur http://localhost:8761)*
 
-### 3️⃣ Lancer la passerelle (Gateway Service)
+### 3. Gateway Service
 ```bash
 cd gateway-service
 mvnw.cmd spring-boot:run
 ```
 
-### 4️⃣ Lancer les services métiers (User & Video)
-Ces services peuvent être lancés en parallèle une fois que les 3 premiers sont opérationnels.
-
-**Terminal 4 (User Service) :**
+### 4. User & Video Services
 ```bash
 cd user-service
 mvnw.cmd spring-boot:run
 ```
 
-**Terminal 5 (Video Service) :**
 ```bash
 cd video-service
 mvnw.cmd spring-boot:run
@@ -144,10 +134,3 @@ src/main/java/com/houssam/<service>/
 └── service/        → Logique métier
 ```
 
----
-
-## ⚠️ Points d'attention
-
-- Les `application.yaml` de la plupart des services sont minimalistes → la vraie config est attendue depuis le `config-service`.
-- Le `config-service` possède une dépendance Eureka Server qui semble redondante avec le `discovery-service`.
-- Les controllers de `user-service` et `video-service` sont encore **vides** — développement en cours.
