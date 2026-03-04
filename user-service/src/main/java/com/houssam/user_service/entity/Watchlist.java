@@ -1,9 +1,10 @@
-package com.houssam.user_service.user;
+package com.houssam.user_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,5 +24,5 @@ public class Watchlist {
     @Column(nullable = false)
     private long videoId;
 
-    private LocalDate addedAt;
+    private LocalDateTime addedAt;
 }
