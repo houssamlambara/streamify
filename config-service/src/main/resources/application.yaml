@@ -1,3 +1,17 @@
+server:
+  port: 8888
+
 spring:
   application:
     name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/houssamlambara/streamify-config
+          default-label: main
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
