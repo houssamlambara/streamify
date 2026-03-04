@@ -33,7 +33,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUserById(long userId) {
-        return null;
+        return repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found, id : "+userId));
     }
 
     @Override
