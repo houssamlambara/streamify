@@ -3,6 +3,8 @@ package com.houssam.user_service.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -23,5 +25,19 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate(){
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate(){
+        updatedAt = LocalDateTime.now();
+    }
 
 }
