@@ -1,17 +1,18 @@
 package com.houssam.user_service.service;
 
-import com.houssam.user_service.dto.UserDto;
-import com.houssam.user_service.dto.WatchlistDto;
+import com.houssam.user_service.dto.UserRequestDto;
+import com.houssam.user_service.dto.WatchlistRequestDto;
 import com.houssam.user_service.entity.User;
 import com.houssam.user_service.entity.Watchlist;
 
-public interface UserService {
-    User createUser(UserDto dto);
-    User getUserById(long userId);
-    User getAllUser();
-    User updateUser(UserDto dto);
-    void deleteUser(long userId);
+import java.util.List;
 
-    Watchlist addToWatchlist(WatchlistDto dto);
-    void removeFromWatchlist(long watchlistId);
+public interface UserService {
+    User createUser(UserRequestDto dto);
+    User getUserById(Long userId);
+    List<User> getAllUser();
+    User updateUser(Long id, UserRequestDto dto);
+    void deleteUser(Long userId);
+    Watchlist addToWatchlist(WatchlistRequestDto dto);
+    void removeFromWatchList(Long id);
 }

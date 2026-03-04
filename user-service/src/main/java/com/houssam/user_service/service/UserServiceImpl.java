@@ -1,8 +1,10 @@
 package com.houssam.user_service.service;
 
 import com.houssam.user_service.EmailAlreadyExistsException;
-import com.houssam.user_service.dto.UserDto;
+import com.houssam.user_service.dto.UserRequestDto;
+import com.houssam.user_service.dto.WatchlistRequestDto;
 import com.houssam.user_service.entity.User;
+import com.houssam.user_service.entity.Watchlist;
 import com.houssam.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +18,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     @Override
-    public User createUser(UserDto dto) {
+    public User createUser(UserRequestDto dto) {
 
         boolean exists = repository.existsByEmail(dto.getEmail());
 
@@ -34,7 +36,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User getUserById(long userId) {
+    public User getUserById(Long userId) {
         return repository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("user not found, id : "+userId));
     }
@@ -45,7 +47,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User updateUser(long id,UserDto dto) {
+    public User updateUser(Long id, UserRequestDto dto) {
 
         User user = repository.findById(id).orElseThrow(
                 () -> new RuntimeException("user not found, id :"+id)
@@ -59,7 +61,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(long userId) {
+    public void deleteUser(Long userId) {
         repository.deleteById(userId);
+    }
+
+    @Override
+    public Watchlist addToWatchlist(WatchlistRequestDto dto) {
+        return null;
+    }
+
+    @Override
+    public void removeFromWatchList(Long id) {
+
     }
 }

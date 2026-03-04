@@ -1,10 +1,12 @@
 package com.houssam.user_service.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
-public class UserDto {
+@Data
+public class UserRequestDto {
     @NotBlank(message = "user name is required")
-    private String name;
+    private String userName;
 
     @NotBlank(message = "email is required")
     private String email;
