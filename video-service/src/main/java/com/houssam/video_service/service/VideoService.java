@@ -1,7 +1,6 @@
 package com.houssam.video_service.service;
 
-import com.houssam.video_service.dto.VideoResponseDTO;
-import com.houssam.video_service.enums.VideoCategory;
+import com.houssam.video_service.dto.response.VideoResponseDTO;
 
 import java.util.List;
 

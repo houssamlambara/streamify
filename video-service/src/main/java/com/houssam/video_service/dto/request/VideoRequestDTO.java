@@ -1,4 +1,4 @@
-package com.houssam.video_service.dto;
+package com.houssam.video_service.dto.request;
 
 import com.houssam.video_service.enums.VideoCategory;
 import com.houssam.video_service.enums.VideoType;
