@@ -1,24 +1,31 @@
 package com.houssam.user_service.service;
 
+import com.houssam.user_service.dto.VideoDto;
+import com.houssam.user_service.dto.WatchlistResponseDto;
 import com.houssam.user_service.exception.EmailAlreadyExistsException;
 import com.houssam.user_service.dto.UserRequestDto;
 import com.houssam.user_service.dto.WatchlistRequestDto;
 import com.houssam.user_service.entity.User;
 import com.houssam.user_service.entity.Watchlist;
 import com.houssam.user_service.exception.VideoAlreadyInWatchlist;
+import com.houssam.user_service.feign.VideoClient;
 import com.houssam.user_service.repository.UserRepository;
 import com.houssam.user_service.repository.WatchlistRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final WatchlistRepository watchlistRepository;
+    private final VideoClient videoClient;
 
     @Override
     @Transactional
@@ -73,7 +80,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public Watchlist addToWatchlist(Long userId,WatchlistRequestDto dto) {
+    public WatchlistResponseDto addToWatchlist(Long userId,WatchlistRequestDto dto) {
         userRepository.findById(userId).orElseThrow(
                 ()-> new RuntimeException("user not found id : "+userId)
         );
@@ -89,12 +96,54 @@ public class UserServiceImpl implements UserService{
                 .videoId(dto.getVideoId())
                 .build();
 
-        return watchlistRepository.save(watchlist);
+        return enrichWatchlist(watchlistRepository.save(watchlist));
 
     }
 
     @Override
-    public void removeFromWatchList(Long id) {
+    public List<WatchlistResponseDto> getUserWatchlist(Long userId){
+        userRepository.findById(userId).orElseThrow(
+                ()-> new RuntimeException("user not found id : "+userId)
+        );
 
+        return watchlistRepository.findAll()
+                .stream()
+                .filter(w -> w.getUserId() == userId)
+                .map(this::enrichWatchlist)
+                .collect(Collectors.toList());
+    }
+
+    private WatchlistResponseDto enrichWatchlist(Watchlist watchlist){
+
+        VideoDto videoDto = null;
+
+        try{
+            videoDto = videoClient.getVideoById(watchlist.getVideoId());
+        }catch (Exception e){
+            log.warn("could not fetch video {} from service",watchlist.getVideoId());
+        }
+
+        return WatchlistResponseDto.builder()
+                .id(watchlist.getId())
+                .videoId(watchlist.getVideoId())
+                .userId(watchlist.getUserId())
+                .addedAt(watchlist.getAddedAt())
+                .video(videoDto)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void removeFromWatchList(Long userId,String videoId) {
+
+        userRepository.findById(userId).orElseThrow(
+                ()-> new RuntimeException("user not found id : "+userId)
+        );
+
+        boolean existInWatch = watchlistRepository.existsByUserIdAndVideoId(userId,videoId);
+
+        if(existInWatch){
+            watchlistRepository.deleteByUserIdAndVideoId(userId,videoId);
+        }
     }
 }

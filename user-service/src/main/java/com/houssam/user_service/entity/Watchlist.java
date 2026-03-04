@@ -22,7 +22,7 @@ public class Watchlist {
     private long userId;
 
     @Column(nullable = false)
-    private long videoId;
+    private String videoId;
 
     private LocalDateTime addedAt;
 

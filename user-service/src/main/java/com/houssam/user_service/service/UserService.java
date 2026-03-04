@@ -2,8 +2,8 @@ package com.houssam.user_service.service;
 
 import com.houssam.user_service.dto.UserRequestDto;
 import com.houssam.user_service.dto.WatchlistRequestDto;
+import com.houssam.user_service.dto.WatchlistResponseDto;
 import com.houssam.user_service.entity.User;
-import com.houssam.user_service.entity.Watchlist;
 
 import java.util.List;
 
@@ -13,6 +13,7 @@ public interface UserService {
     List<User> getAllUser();
     User updateUser(Long id, UserRequestDto dto);
     void deleteUser(Long userId);
-    Watchlist addToWatchlist(Long userId,WatchlistRequestDto dto);
-    void removeFromWatchList(Long id);
+    WatchlistResponseDto addToWatchlist(Long userId,WatchlistRequestDto dto);
+    void removeFromWatchList(Long userId, String videoId);
+    List<WatchlistResponseDto> getUserWatchlist(Long userId);
 }
