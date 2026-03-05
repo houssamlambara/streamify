@@ -1,9 +1,13 @@
 package com.houssam.user_service.controller;
 
 import com.houssam.user_service.dto.UserRequestDto;
+import com.houssam.user_service.dto.WatchlistRequestDto;
+import com.houssam.user_service.dto.WatchlistResponseDto;
 import com.houssam.user_service.entity.User;
 import com.houssam.user_service.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,4 +50,22 @@ public class UserController {
         userService.deleteUser(userId);
         return ResponseEntity.ok("User deleted successfully!");
     }
+
+    @PostMapping("/{userId}/watchlist")
+    public ResponseEntity<WatchlistResponseDto> addToWatchlist(@PathVariable Long userId,@RequestBody @Valid WatchlistRequestDto dto){
+        return new ResponseEntity<>(userService.addToWatchlist(userId,dto),HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{userId}/watchlist/{videoId}")
+    public ResponseEntity<String> removeFromWatchlist(@PathVariable Long userId, @PathVariable String videoId){
+        userService.removeFromWatchList(userId,videoId);
+        return ResponseEntity.ok("video remove from watchlist successfully");
+    }
+
+    @GetMapping("/watchlist/{userId}")
+    public ResponseEntity<List<WatchlistResponseDto>> getUserWatchlist(@PathVariable Long userId){
+        return ResponseEntity.ok(userService.getUserWatchlist(userId));
+    }
+
+
 }
