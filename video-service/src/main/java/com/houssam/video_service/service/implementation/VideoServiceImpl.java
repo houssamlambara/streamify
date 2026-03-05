@@ -120,7 +120,7 @@ public class VideoServiceImpl implements VideoService {
 
                     if (metadata != null) {
                         if (video.getDescription() == null || video.getDescription().isEmpty()) {
-                            video.setDescription(metadata.getDescription());
+                            video.setDescription(metadata.getOverview());
                         }
                         if (video.getRating() == null && metadata.getVoteAverage() != null) {
                             video.setRating(metadata.getVoteAverage());
@@ -131,6 +131,26 @@ public class VideoServiceImpl implements VideoService {
                         if (video.getReleaseYear() == null && metadata.getReleaseDate() != null
                                 && metadata.getReleaseDate().length() >= 4) {
                             video.setReleaseYear(Integer.parseInt(metadata.getReleaseDate().substring(0, 4)));
+                        }
+                        if (video.getDuration() == null && metadata.getRuntime() != null) {
+                            video.setDuration(metadata.getRuntime());
+                        }
+                        if (metadata.getCredits() != null) {
+                            if (video.getDirector() == null && metadata.getCredits().getCrew() != null) {
+                                String director = metadata.getCredits().getCrew().stream()
+                                        .filter(c -> "Director".equals(c.getJob()))
+                                        .map(c -> c.getName())
+                                        .findFirst()
+                                        .orElse(null);
+                                video.setDirector(director);
+                            }
+                            if (video.getCast() == null && metadata.getCredits().getCast() != null) {
+                                String cast = metadata.getCredits().getCast().stream()
+                                        .limit(5)
+                                        .map(c -> c.getName())
+                                        .collect(Collectors.joining(", "));
+                                video.setCast(cast.isEmpty() ? null : cast);
+                            }
                         }
                     }
                 } catch (Exception e) {
