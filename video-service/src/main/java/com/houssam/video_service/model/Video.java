@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "videos")
@@ -17,9 +16,9 @@ import java.util.UUID;
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false )
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")

@@ -4,7 +4,12 @@ import com.houssam.video_service.enums.VideoCategory;
 import com.houssam.video_service.enums.VideoType;
 
 import java.time.LocalDateTime;
+import lombok.*;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class VideoResponseDTO {
 
     private String id;
