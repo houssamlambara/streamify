@@ -1,14 +1,12 @@
 package com.houssam.user_service.service;
 
-import com.houssam.user_service.dto.VideoDto;
-import com.houssam.user_service.dto.WatchlistResponseDto;
+import com.houssam.user_service.dto.*;
 import com.houssam.user_service.exception.EmailAlreadyExistsException;
-import com.houssam.user_service.dto.UserRequestDto;
-import com.houssam.user_service.dto.WatchlistRequestDto;
 import com.houssam.user_service.entity.User;
 import com.houssam.user_service.entity.Watchlist;
 import com.houssam.user_service.exception.VideoAlreadyInWatchlist;
 import com.houssam.user_service.feign.VideoClient;
+import com.houssam.user_service.mapper.UserMapper;
 import com.houssam.user_service.repository.UserRepository;
 import com.houssam.user_service.repository.WatchlistRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,19 +20,20 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final WatchlistRepository watchlistRepository;
     private final VideoClient videoClient;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
-    public User createUser(UserRequestDto dto) {
+    public UserResponseDto createUser(UserRequestDto dto) {
 
         boolean exists = userRepository.existsByEmail(dto.getEmail());
 
-        if(exists){
-            throw new EmailAlreadyExistsException("email already exists : "+dto.getEmail());
+        if (exists) {
+            throw new EmailAlreadyExistsException("email already exists : " + dto.getEmail());
         }
 
         User user = User.builder()
@@ -43,33 +42,34 @@ public class UserServiceImpl implements UserService{
                 .password(dto.getPassword())
                 .build();
 
-        return userRepository.save(user);
+        return userMapper.toResponseDto(userRepository.save(user));
     }
 
     @Override
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("user not found, id : "+userId));
+    public UserResponseDto getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found, id : " + userId));
+
+        return userMapper.toResponseDto(user);
     }
 
     @Override
-    public List<User> getAllUser() {
-        return userRepository.findAll();
+    public List<UserResponseDto> getAllUser() {
+        return userRepository.findAll().stream().map(userMapper::toResponseDto).toList();
     }
 
     @Override
     @Transactional
-    public User updateUser(Long id, UserRequestDto dto) {
+    public UserResponseDto updateUser(Long id, UserRequestDto dto) {
 
         User user = userRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("user not found, id :"+id)
-        );
+                () -> new RuntimeException("user not found, id :" + id));
 
         user.setUserName(dto.getUserName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
 
-        return userRepository.save(user);
+        return userMapper.toResponseDto(userRepository.save(user));
     }
 
     @Override
@@ -80,15 +80,14 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public WatchlistResponseDto addToWatchlist(Long userId,WatchlistRequestDto dto) {
+    public WatchlistResponseDto addToWatchlist(Long userId, WatchlistRequestDto dto) {
         userRepository.findById(userId).orElseThrow(
-                ()-> new RuntimeException("user not found id : "+userId)
-        );
+                () -> new RuntimeException("user not found id : " + userId));
 
-        boolean exists = watchlistRepository.existsByVideoId(dto.getVideoId());
+        boolean exists = watchlistRepository.existsByUserIdAndVideoId(userId, dto.getVideoId());
 
-        if(exists){
-            throw new VideoAlreadyInWatchlist("video already in watchlist : "+dto.getVideoId());
+        if (exists) {
+            throw new VideoAlreadyInWatchlist("video already in watchlist : " + dto.getVideoId());
         }
 
         Watchlist watchlist = Watchlist.builder()
@@ -101,10 +100,9 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<WatchlistResponseDto> getUserWatchlist(Long userId){
+    public List<WatchlistResponseDto> getUserWatchlist(Long userId) {
         userRepository.findById(userId).orElseThrow(
-                ()-> new RuntimeException("user not found id : "+userId)
-        );
+                () -> new RuntimeException("user not found id : " + userId));
 
         return watchlistRepository.findAll()
                 .stream()
@@ -113,14 +111,14 @@ public class UserServiceImpl implements UserService{
                 .collect(Collectors.toList());
     }
 
-    private WatchlistResponseDto enrichWatchlist(Watchlist watchlist){
+    private WatchlistResponseDto enrichWatchlist(Watchlist watchlist) {
 
         VideoDto videoDto = null;
 
-        try{
+        try {
             videoDto = videoClient.getVideoById(watchlist.getVideoId());
-        }catch (Exception e){
-            log.warn("could not fetch video {} from service",watchlist.getVideoId());
+        } catch (Exception e) {
+            log.warn("could not fetch video {} from service", watchlist.getVideoId());
         }
 
         return WatchlistResponseDto.builder()
@@ -134,16 +132,15 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void removeFromWatchList(Long userId,String videoId) {
+    public void removeFromWatchList(Long userId, String videoId) {
 
         userRepository.findById(userId).orElseThrow(
-                ()-> new RuntimeException("user not found id : "+userId)
-        );
+                () -> new RuntimeException("user not found id : " + userId));
 
-        boolean existInWatch = watchlistRepository.existsByUserIdAndVideoId(userId,videoId);
+        boolean existInWatch = watchlistRepository.existsByUserIdAndVideoId(userId, videoId);
 
-        if(existInWatch){
-            watchlistRepository.deleteByUserIdAndVideoId(userId,videoId);
+        if (existInWatch) {
+            watchlistRepository.deleteByUserIdAndVideoId(userId, videoId);
         }
     }
 }
