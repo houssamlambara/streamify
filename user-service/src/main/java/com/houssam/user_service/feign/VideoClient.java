@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "video-service")
+@FeignClient(name = "video-service", fallback = VideoClientFallback.class)
 public interface VideoClient {
 
     @GetMapping("/api/videos/{id}")
-    VideoDto getVideoById(@PathVariable String id);
+    VideoDto getVideoById(@PathVariable("id") String id);
 
     @GetMapping("/api/videos")
     List<VideoDto> getVideos();
