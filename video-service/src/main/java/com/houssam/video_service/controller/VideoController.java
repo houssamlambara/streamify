@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/videos")
+@RequestMapping("/videos")
 @RequiredArgsConstructor
 public class VideoController {
 
@@ -24,7 +24,7 @@ public class VideoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<VideoResponseDTO> getVideoById(@PathVariable String id) {
+    public ResponseEntity<VideoResponseDTO> getVideoById(@PathVariable("id") String id) {
         return ResponseEntity.ok(videoService.getVideoById(id));
     }
 
@@ -36,26 +36,26 @@ public class VideoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<VideoResponseDTO> updateVideo(
-            @PathVariable String id,
+            @PathVariable("id") String id,
             @Valid @RequestBody VideoRequestDTO videoRequestDTO) {
         return ResponseEntity.ok(videoService.updateVideo(id, videoRequestDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVideo(@PathVariable String id) {
+    public ResponseEntity<Void> deleteVideo(@PathVariable("id") String id) {
         videoService.deleteVideo(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<VideoResponseDTO>> searchByTitle(@RequestParam String title) {
+    public ResponseEntity<List<VideoResponseDTO>> searchByTitle(@RequestParam("title") String title) {
         return ResponseEntity.ok(videoService.searchByTitle(title));
     }
 
     @GetMapping("/filter")
     public ResponseEntity<List<VideoResponseDTO>> filterVideos(
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String category) {
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "category", required = false) String category) {
         if (type != null) {
             return ResponseEntity.ok(videoService.getByType(type));
         } else if (category != null) {

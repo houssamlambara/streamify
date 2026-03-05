@@ -24,7 +24,7 @@ public class TmdbService {
     private String imageBaseUrl;
 
     public TmdbVideoResponseDTO MovieById(String tmdbId) {
-        String url = baseUrl + "/movie/" + tmdbId + "?api_key=" + tmdbApiKey;
+        String url = baseUrl + "/movie/" + tmdbId + "?api_key=" + tmdbApiKey + "&append_to_response=credits";
         try {
             return restTemplate.getForObject(url, TmdbVideoResponseDTO.class);
         } catch (Exception e) {

@@ -9,11 +9,11 @@ import lombok.*;
 public class TmdbVideoResponseDTO {
 
     private String id;
-    private String titre;
-    private String description;
+    private String title;
+    private String overview;
 
     @JsonProperty("poster_path")
-    private String posterPath; // → thumbnailUrl = "https://image.tmdb.org/t/p/w500" + posterPath
+    private String posterPath;
 
     @JsonProperty("release_date")
     private String releaseDate;
@@ -21,5 +21,30 @@ public class TmdbVideoResponseDTO {
     @JsonProperty("vote_average")
     private Double voteAverage;
 
-    private Integer duration;
+    private Integer runtime;
+
+    private Credits credits;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Credits {
+        private java.util.List<CastMember> cast;
+        private java.util.List<CrewMember> crew;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CastMember {
+        private String name;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CrewMember {
+        private String name;
+        private String job;
+    }
 }
