@@ -13,7 +13,7 @@ public class VideoClientFallback implements VideoClient{
     @Override
     public VideoDto getVideoById(String id) {
         log.warn("Fallback : video-service unavailable for id : {}",id);
-        VideoDto fallback =new VideoDto();
+        VideoDto fallback = new VideoDto();
         fallback.setId(id);
         fallback.setTitle("Video Unavailable");
         return fallback;
