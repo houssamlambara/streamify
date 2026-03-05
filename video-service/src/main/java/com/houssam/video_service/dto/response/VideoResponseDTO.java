@@ -3,6 +3,7 @@ package com.houssam.video_service.dto.response;
 import com.houssam.video_service.enums.VideoCategory;
 import com.houssam.video_service.enums.VideoType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VideoResponseDTO {
 
     private String id;
