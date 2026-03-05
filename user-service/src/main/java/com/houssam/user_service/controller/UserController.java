@@ -1,6 +1,7 @@
 package com.houssam.user_service.controller;
 
 import com.houssam.user_service.dto.UserRequestDto;
+import com.houssam.user_service.dto.UserResponseDto;
 import com.houssam.user_service.dto.WatchlistRequestDto;
 import com.houssam.user_service.dto.WatchlistResponseDto;
 import com.houssam.user_service.entity.User;
@@ -22,25 +23,27 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserRequestDto userRequestDto) {
-        return new ResponseEntity<>(userService.createUser(userRequestDto), HttpStatus.CREATED);
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequestDto) {
+        UserResponseDto user = userService.createUser(userRequestDto);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     // 2. Get User by ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") long userId) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") long userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     // 3. Get All Users
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUser());
     }
 
     // 4. Update User
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody UserRequestDto userRequestDto) {
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") long id,
+            @RequestBody UserRequestDto userRequestDto) {
         return ResponseEntity.ok(userService.updateUser(id, userRequestDto));
     }
 
@@ -52,20 +55,21 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/watchlist")
-    public ResponseEntity<WatchlistResponseDto> addToWatchlist(@PathVariable Long userId,@RequestBody @Valid WatchlistRequestDto dto){
-        return new ResponseEntity<>(userService.addToWatchlist(userId,dto),HttpStatus.CREATED);
+    public ResponseEntity<WatchlistResponseDto> addToWatchlist(@RequestBody @Valid WatchlistRequestDto dto,
+            @PathVariable("userId") Long userId) {
+        return new ResponseEntity<>(userService.addToWatchlist(userId, dto), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{userId}/watchlist/{videoId}")
-    public ResponseEntity<String> removeFromWatchlist(@PathVariable Long userId, @PathVariable String videoId){
-        userService.removeFromWatchList(userId,videoId);
+    public ResponseEntity<String> removeFromWatchlist(@PathVariable("userId") Long userId,
+            @PathVariable("videoId") String videoId) {
+        userService.removeFromWatchList(userId, videoId);
         return ResponseEntity.ok("video remove from watchlist successfully");
     }
 
     @GetMapping("/watchlist/{userId}")
-    public ResponseEntity<List<WatchlistResponseDto>> getUserWatchlist(@PathVariable Long userId){
+    public ResponseEntity<List<WatchlistResponseDto>> getUserWatchlist(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(userService.getUserWatchlist(userId));
     }
-
 
 }
