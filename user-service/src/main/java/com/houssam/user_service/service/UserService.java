@@ -4,6 +4,7 @@ import com.houssam.user_service.dto.UserRequestDto;
 import com.houssam.user_service.dto.UserResponseDto;
 import com.houssam.user_service.dto.WatchlistRequestDto;
 import com.houssam.user_service.dto.WatchlistResponseDto;
+import com.houssam.user_service.dto.*;
 
 import java.util.List;
 
@@ -16,4 +17,9 @@ public interface UserService {
     WatchlistResponseDto addToWatchlist(Long userId,WatchlistRequestDto dto);
     void removeFromWatchList(Long userId, String videoId);
     List<WatchlistResponseDto> getUserWatchlist(Long userId);
+
+    // WatchHistory
+    WatchHistoryResponseDto recordWatchHistory(Long userId, WatchHistoryRequestDto dto);
+    List<WatchHistoryResponseDto> getUserWatchHistory(Long userId);
+    WatchStatsDto getUserWatchStats(Long userId);
 }

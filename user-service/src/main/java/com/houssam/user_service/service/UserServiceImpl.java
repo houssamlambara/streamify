@@ -1,13 +1,16 @@
 package com.houssam.user_service.service;
 
 import com.houssam.user_service.dto.*;
+import com.houssam.user_service.dto.*;
 import com.houssam.user_service.exception.EmailAlreadyExistsException;
 import com.houssam.user_service.entity.User;
+import com.houssam.user_service.entity.WatchHistory;
 import com.houssam.user_service.entity.Watchlist;
 import com.houssam.user_service.exception.VideoAlreadyInWatchlist;
 import com.houssam.user_service.feign.VideoClient;
 import com.houssam.user_service.mapper.UserMapper;
 import com.houssam.user_service.repository.UserRepository;
+import com.houssam.user_service.repository.WatchHistoryRepository;
 import com.houssam.user_service.repository.WatchlistRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final WatchlistRepository watchlistRepository;
+    private final WatchHistoryRepository watchHistoryRepository;
     private final VideoClient videoClient;
     private final UserMapper userMapper;
 
@@ -133,14 +138,87 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void removeFromWatchList(Long userId, String videoId) {
-
-        userRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("user not found id : " + userId));
-
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found id : " + userId));
         boolean existInWatch = watchlistRepository.existsByUserIdAndVideoId(userId, videoId);
 
         if (existInWatch) {
             watchlistRepository.deleteByUserIdAndVideoId(userId, videoId);
         }
     }
+
+    public WatchHistoryResponseDto recordWatchHistory(Long userId, WatchHistoryRequestDto dto) {
+
+        userRepository.findById(userId).orElseThrow(
+                () -> new RuntimeException("user not found id : " + userId));
+
+        Optional<WatchHistory> existing = watchHistoryRepository.findByUserIdAndVideoId(userId, dto.getVideoId());
+
+        WatchHistory watchHistory;
+        if (existing.isPresent()) {
+            watchHistory = existing.get();
+            watchHistory.setProgressTime(dto.getProgressTime());
+            watchHistory.setCompleted(dto.getCompleted());
+        } else {
+            watchHistory = WatchHistory.builder()
+                    .userId(userId)
+                    .videoId(dto.getVideoId())
+                    .progressTime(dto.getProgressTime())
+                    .completed(dto.getCompleted())
+                    .build();
+        }
+
+        return enrichWatchHistory(watchHistoryRepository.save(watchHistory));
+    }
+
+    @Override
+    public List<WatchHistoryResponseDto> getUserWatchHistory(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found id : " + userId));
+
+        return watchHistoryRepository.findByUserId(userId)
+                .stream()
+                .map(this::enrichWatchHistory)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public WatchStatsDto getUserWatchStats(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found id : " + userId));
+
+        long total       = watchHistoryRepository.countByUserId(userId);
+        long completed   = watchHistoryRepository.countByUserIdAndCompleted(userId, true);
+        long incomplete  = total - completed;
+        long totalTime   = watchHistoryRepository.sumProgressTimeByUserId(userId);
+        double rate      = total > 0 ? (double) completed / total * 100 : 0.0;
+
+        return WatchStatsDto.builder()
+                .userId(userId)
+                .totalVideosWatched(total)
+                .completedVideos(completed)
+                .incompleteVideos(incomplete)
+                .totalProgressTime(totalTime)
+                .completionRate(Math.round(rate * 100.0) / 100.0)
+                .build();
+    }
+
+    private WatchHistoryResponseDto enrichWatchHistory(WatchHistory watchHistory) {
+        VideoDto videoDto = null;
+        try {
+            videoDto = videoClient.getVideoById(watchHistory.getVideoId());
+        } catch (Exception e) {
+            log.warn("could not fetch video {} from video-service", watchHistory.getVideoId());
+        }
+        return WatchHistoryResponseDto.builder()
+                .id(watchHistory.getId())
+                .userId(watchHistory.getUserId())
+                .videoId(watchHistory.getVideoId())
+                .watchedAt(watchHistory.getWatchedAt())
+                .progressTime(watchHistory.getProgressTime())
+                .completed(watchHistory.getCompleted())
+                .video(videoDto)
+                .build();
+    }
 }
+

@@ -1,14 +1,9 @@
 package com.houssam.user_service.controller;
 
-import com.houssam.user_service.dto.UserRequestDto;
-import com.houssam.user_service.dto.UserResponseDto;
-import com.houssam.user_service.dto.WatchlistRequestDto;
-import com.houssam.user_service.dto.WatchlistResponseDto;
-import com.houssam.user_service.entity.User;
+import com.houssam.user_service.dto.*;
 import com.houssam.user_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,4 +67,24 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserWatchlist(userId));
     }
 
+    // ===================== WatchHistory (tes ajouts) =====================
+
+    @PostMapping("/{id}/history")
+    public ResponseEntity<WatchHistoryResponseDto> recordWatchHistory(
+            @PathVariable("id") Long userId,
+            @RequestBody WatchHistoryRequestDto dto) {
+        return new ResponseEntity<>(userService.recordWatchHistory(userId, dto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<WatchHistoryResponseDto>> getUserWatchHistory(
+            @PathVariable("id") Long userId) {
+        return ResponseEntity.ok(userService.getUserWatchHistory(userId));
+    }
+
+    @GetMapping("/{id}/history/stats")
+    public ResponseEntity<WatchStatsDto> getUserWatchStats(
+            @PathVariable("id") Long userId) {
+        return ResponseEntity.ok(userService.getUserWatchStats(userId));
+    }
 }
