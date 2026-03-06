@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # Database Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: streamify-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - streamify-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Config Service (Central Configuration)
+  config-service:
+    build:
+      context: .
+      dockerfile: config-service/Dockerfile
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    networks:
+      - streamify-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Discovery Service (Eureka Server)
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+    depends_on:
+      config-service:
+        condition: service_healthy
+    networks:
+      - streamify-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Gateway Service (API Proxy)
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - streamify-network
+
+  # Video Service
+  video-service:
+    build:
+      context: .
+      dockerfile: video-service/Dockerfile
+    container_name: video-service
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/video_service_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - streamify-network
+
+  # User Service
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_service_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - streamify-network
+
+networks:
+  streamify-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
